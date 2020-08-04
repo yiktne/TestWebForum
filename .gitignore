@@ -102,3 +102,8 @@ dist
 
 # TernJS port file
 .tern-port
+test_myforum_front/public/logo192.png
+test_myforum_front/public/logo512.png
+test_myforum_front/src/index.css
+test_myforum_front/src/logo.svg
+test_myforum_back/secretdatas.js
