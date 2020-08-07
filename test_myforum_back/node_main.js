@@ -18,9 +18,9 @@ app.use(session({
   store:require("mongoose-session")(mongoose)
 }));
 
-var user = require('./schema/schema_user'); 
+var user = require('./schema/schema_user');
 
-var router = require("./routes/router_main")(app, user);
+var router = require("./routes/router_user")(app, user);
 
 var server = app.listen(serverPort, function(){
   console.log("NodeJS server open at port " + serverPort);

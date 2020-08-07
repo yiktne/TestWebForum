@@ -5,5 +5,5 @@
  */
 module.exports = (app, user) => {
 
-    require("./router_user")(app, user);
+    var user = require("./router_user")(app, user);
 }
