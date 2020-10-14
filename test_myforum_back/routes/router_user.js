@@ -1,12 +1,13 @@
 /**
- * @param {import("express").Application} app Express Application
- * @param {import("mongoose").Model} user User Schema
+ * @param {import('express').Router} router 
+ * @param {import("../schema/schema_user")} User 
  */
-module.exports = (app, User) => {
-    var crypto = require("crypto");
-
+module.exports = (router, User) => {
+    const crypto = require("crypto");
+    const jwt = require('jsonwebtoken');
+    
     // 계정 생성
-    app.post("/signup", async (req, res) => {
+    router.post("/signup", async (req, res) => {
         if(req.body.userID === "" || req.body.userID === null) {
             return res.status(500).json({error:"userID not found", code:100});
         }
@@ -17,22 +18,25 @@ module.exports = (app, User) => {
             return res.status(500).json({error:"nickname not found", code:102});
         }
 
-        const result = User.find({userID:id}, (err, user) => {
-            if(user.lenth !== 0) {
+        const result = User.find({userID:req.body.userID}, (err, user) => {
+            if(user.length !== 0) {
                 return res.status(500).json({error:"userID already used", code:201});
             }
 
-            crypto.randomBytes(64, function(err, buf) {
+            crypto.randomBytes(64, async function(err, buf) {
                 const newUser = new User();
-                let pw = encrypt(buf.toString("base64"));
                 
-                /*
+                const pwKey = buf.toString("base64");
+                let pw = await encrypt(req.body.password, pwKey);
+                
                 newUser.userID = req.body.userID;
                 newUser.nickname = req.body.nickname;
-                newUser.pw = pw;
-                newUser.pwKey = key;
+                newUser.pw = pw.toString("base64");
+                newUser.pwKey = pwKey;
                 newUser.userLevel = 1;
         
+                console.log(err);
+
                 newUser.save().then(function(product){
                     console.log(product);
                     
@@ -40,40 +44,41 @@ module.exports = (app, User) => {
                 }, function(err){
                     console.log(err);
                     res.status(500).json({error:err, code:300});
-                });*/
+                });
             });
         });
     });
 
 
 
-    app.post("/signin", (req, res) => {
-        console.log(req.session.user);
-        if(req.session.user !== undefined || req.session.user !== null) { 
-            user.find({userID:req.body.userID}, (err, user) => {
-                if(err) {
-                    res.status(500).json({error:err});
-                }
+    router.post("/signin", (req, res) => {
+        User.findOne({userID:req.body.userID}, (err, user) => {
+            if(err) {
+                console.log(err);
+                res.status(500).json({error:err});
+            }
 
-                crypto.pbkdf2(req.body.password, user.pwTemp, requier("../secretdatas.js").encryptCount, 64, "sha512", (err, key)=>{
-                    if(key.toString("base64") === user.pwKey) {
+            if(user !== null) {
+                crypto.pbkdf2(req.body.password, user.pwKey, require("../secretdatas").encryptCount, 64, "sha512", (err, key)=>{
+                    console.log(key.toString("base64"));
+                    console.log(user.pw);
+                    if(key.toString("base64") === user.pw) {
                         // 로그인 성공
-                        req.session.user = {
-                            id: req.body.userID,
-                            authorized: true
-                        };
-
-                        req.session.save(()=>{
-                            console.log(req.session.user);
-                            res.redirect("/");
-                        });
+                        // JWT 발급
+                        const p = jwt.sign({userID: user.userID, nickName:user.nickName, userLevel:user.userLevel}, require('../secretdatas').jwtSecret);
+    
+                        res.json({token:p});
+                    } else {
+                        return res.status(500).json({error:'password unmatched', code:200});
                     }
                 });
-            });
-        }
+            } else {
+                return res.status(500).json({error:'user not found', code:100});
+            }
+        });
     });
 
-    app.post("/signout", (req, res) => {
+    router.post("/signout", (req, res) => {
         delete req.session.user;
 
         req.session.save(()=>{
@@ -85,17 +90,14 @@ module.exports = (app, User) => {
     async function encrypt(value, salt) {
         let result;
         await new Promise((resolve, reject) => {
-            crypto.pbkdf2(value, salt.toString('base64'), require("../secretdatas.js").encryptCount, 64, "sha512", function(err, res) {
+            crypto.pbkdf2(value, salt.toString('base64'), require("../secretdatas").encryptCount, 64, "sha512", function(err, res) {
                 if(err) {
                     reject(err);
                 } else {
-                    resolve();
+                    resolve(res);
                 }
               });
-        })(
-            (err)=>{},
-            (res)=>{ result = res; }
-        );
+        }).then(res => { result = res; })
 
         return result;
     }

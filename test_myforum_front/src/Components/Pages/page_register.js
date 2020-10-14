@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import { bro } from 'react-router-dom';
 
 var axios = require('axios');
 
@@ -6,7 +8,7 @@ const ERR_PWCHECK_FAILED = 1;
 const ERR_VALUE_NULL = 2;
 const ERR_ID_ALREADY_USED = 3;
 
-class SignUp extends Component {
+class PageRegister extends Component {
     
     state = {
         errorCode:0,
@@ -41,7 +43,6 @@ class SignUp extends Component {
         } else if(this.pw.value !== this.pw_re.value) {
             this.setState({errorCode:ERR_PWCHECK_FAILED});
         } else {
-
             const response = await axios.post(this.props.serverURL + "/signup", {userID: this.id.value, password:this.pw.value, nickname:this.nickname.value}).catch((err) => {
                 if (err.response) {
                     if(err.response.data) {
@@ -56,12 +57,13 @@ class SignUp extends Component {
                                 break;
                         }
                     }
-                  } else {
-
-                  }
+                }
             });
 
-            console.log(response);
+            if(response !== undefined) {
+                alert('가입에 성공하였습니다.');
+                this.props.history.push('/');
+            }
         }
     }
 
@@ -79,4 +81,8 @@ class SignUp extends Component {
     }
 }
 
-export default SignUp;
+const mapStateToProps = ({client}) => ({
+    serverURL:client.serverURL
+});
+
+export default connect(mapStateToProps)(PageRegister);

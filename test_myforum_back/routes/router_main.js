@@ -1,9 +1,8 @@
-/**
- * Main Router
- * @param {import("express").Application} app Express App
- * @param {import("../schema/schema_user")} user User Schema
- */
-module.exports = (app, user) => {
+const express = require('express');
+const router = express.Router();
 
-    var user = require("./router_user")(app, user);
-}
+const user = require('../schema/schema_user');
+
+require("./router_user")(router, user);
+
+module.exports = router;
