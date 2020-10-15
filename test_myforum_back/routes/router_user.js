@@ -30,7 +30,7 @@ module.exports = (router, User) => {
                 let pw = await encrypt(req.body.password, pwKey);
                 
                 newUser.userID = req.body.userID;
-                newUser.nickname = req.body.nickname;
+                newUser.nickName = req.body.nickname;
                 newUser.pw = pw.toString("base64");
                 newUser.pwKey = pwKey;
                 newUser.userLevel = 1;

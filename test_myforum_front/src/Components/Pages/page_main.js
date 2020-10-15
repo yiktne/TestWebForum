@@ -42,10 +42,14 @@ class PageMain extends Component {
         }
 
         const response = await axios.post(this.props.serverURL + '/signin', {userID:this.idInput.value, password:this.pwInput.value}).catch((err) => {
-            console.log(err);
+            console.log(err.response.data);
         });
 
-        this.props.setUserToken(response.data.token);
+        if(response !== undefined) {
+            console.log(response);
+            this.props.setUserToken(response.data.token);
+            this.props.history.push('/list');
+        }
     }
 }
 
