@@ -7,12 +7,10 @@
  
 ### 사용하고 있는 패키지
  - Express
- - mongoose
- - body-parser
+ - mongoose, mongoose-auto-increment
  - cors
- - express-session
- - mongoose-session
  - crypto
+ - jsonwebtoken
  
 ### 주의사항   
 
@@ -22,14 +20,17 @@
  현재 작성해주셔야 하는 부분은 다음과 같습니다.
   1. mongoURL   
     사용하실 mongoDB의 서버 URL을 여기다 넣어주시면 됩니다. node_db.js에서 이 값을 사용합니다.
-  2. sessionSecret
+  2. sessionSecret  
     서버의 세션 secret 값입니다. 아무 값이나 원하시는 String값을 넣어주시면 됩니다.
-  3. encryptCount
-    비밀번호의 암호화 알고리즘에 필요한 값입니다. 약 100000±10000정도의 Number값을 넣어주시면 됩니다.
+  3. encryptCount  
+    비밀번호의 암호화 알고리즘을 적용할 횟수입니다. 약 100000±10000정도의 Number값을 넣어주시면 됩니다.
    
 ## Frontend
   React 기반으로 작성하고 있습니다.
   
+### 사용하고 있는 패키지
+  - redux(react-redux)
+  - react-cookie
+  - react-router-dom
+  - axios
   ---
-  
-  추후 작성 예정입니다..
