@@ -3,7 +3,6 @@ import axios from 'axios';
 import {connect} from 'react-redux';
 
 import PostList from '../Form/form_postlist';
-import client from '../../Store/client';
 
 class PagePostList extends Component {
 
@@ -28,14 +27,12 @@ class PagePostList extends Component {
     }
 
     handlePost = () => {
-        console.log(this.props.userToken);
-        axios.post(this.props.serverURL + '/post', {title:'테스트입니다', content:'테스트 게시글입니다.', userToken:this.props.userToken})
+        this.props.history.push('/post');
     }
 }
 
 const mapStateToProps = ({client}) => ({
     serverURL: client.serverURL,
-    userToken: client.userToken,
 });
 
 export default connect(mapStateToProps)(PagePostList);

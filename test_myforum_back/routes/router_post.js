@@ -7,6 +7,7 @@ module.exports = (router, post, comment) => {
     const jwt = require('jsonwebtoken');
 
     router.get('/getPosts', (req, res) => {
+
         post.find((err, result) => {
             if(err) {
                 return res.status(500).json(err);
@@ -18,13 +19,13 @@ module.exports = (router, post, comment) => {
 
     router.post('/post', (req, res) => {
         if(req.body.title === "" || req.body.title === undefined) {
-            res.status(500).json({err:'title not found', code:100});
-        }
-        if(req.body.userToken === "" || req.body.userToken === undefined) {
-            res.status(500).json({err:'userToken not found', code:101});
+            return res.status(500).json({err:'title not found', code:100});
         }
         if(req.body.content === "" || req.body.content === undefined) {
-            res.status(500).json({err:'content not found', code:103});
+            return res.status(500).json({err:'content not found', code:101});
+        }
+        if(req.body.userToken === "" || req.body.userToken === undefined) {
+            return res.status(500).json({err:'userToken not found', code:102});
         }
 
         console.log(req.body.userToken);

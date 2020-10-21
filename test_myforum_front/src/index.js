@@ -5,6 +5,7 @@ import * as serviceWorker from './serviceWorker';
 
 import {createStore} from 'redux';
 import {Provider} from 'react-redux';
+import {CookiesProvider} from 'react-cookie';
 import reducers from './Store/index';
 
 const devTools = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__();
@@ -14,7 +15,9 @@ const store = createStore(reducers, devTools);
 const render = () => {
   ReactDOM.render(
     <Provider store={store}>
-      <App />
+      <CookiesProvider>
+        <App />
+      </CookiesProvider>
     </Provider>,
     document.getElementById('root')
   );

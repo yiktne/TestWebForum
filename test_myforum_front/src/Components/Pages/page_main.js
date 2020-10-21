@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import axios from 'axios';
-
-import {setUserToken} from '../../Store/client';
+import { withCookies } from 'react-cookie';
 
 class PageMain extends Component {
     idInput = '';
@@ -14,17 +13,29 @@ class PageMain extends Component {
     }
 
     render() {
-        
-        if(this.props.userToken !== '') {
-            alert('이미 로그인하였습니다.');
+        if(this.props.cookies.get("userToken") !== undefined) {
+            return this.renderLogout();
+        } else {
+            return this.renderLogin();
         }
+    }
 
+    renderLogout() {
         return (
             <div>
                 Welcome!<br/>
-                ID : <input type="text" ref={ref => this.idInput = ref}/><br/>
-                PW : <input type="password" ref={ref => this.pwInput = ref}/><br/>
-                <input type='button' value="login" onClick={this.handleLogin}/><br/>
+                <input type='button' value="logout" onClick={this.handleLogout}/><br/>
+            </div>
+        )
+    }
+
+    renderLogin() {
+        return (
+            <div>
+                Welcome!<br/>
+                아이디 : <input type="text" ref={ref => this.idInput = ref}/><br/>
+                비밀번호 : <input type="password" ref={ref => this.pwInput = ref}/><br/>
+                <input type='button' value="로그인" onClick={this.handleLogin}/><br/>
                 <Link to='/register'>register</Link><br/>
             </div>
         );
@@ -47,17 +58,20 @@ class PageMain extends Component {
 
         if(response !== undefined) {
             console.log(response);
-            this.props.setUserToken(response.data.token);
+            axios.defaults.headers.common['token'] = `Bearer ${response.data.token}`;
+            this.props.cookies.set('userToken', response.data.token, {maxAge:3600*24});
             this.props.history.push('/list');
         }
+    }
+
+    handleLogout = () => {
+        this.props.cookies.remove("userToken");
+        alert("로그아웃 하였습니다.");
     }
 }
 
 const mapStateToProps = ({client}) => ({
     serverURL:client.serverURL,
-    userToken: client.userToken
 });
 
-const mapDispatchToProps = {setUserToken};
-
-export default connect(mapStateToProps, mapDispatchToProps)(PageMain);
+export default connect(mapStateToProps)(withCookies(PageMain));

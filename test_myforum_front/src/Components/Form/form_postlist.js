@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 
 class PostList extends Component {
 
@@ -27,13 +28,13 @@ class PostList extends Component {
         console.log(this.props.posts);
 
         if(this.props.posts.length === 0) {
-            result.push((<tr key='nopost'><td colSpan='6'>게시글이 없습니다.</td></tr>));
+            result.push((<tr key='nopost'><td colSpan={6}>게시글이 없습니다.</td></tr>));
         } else {
             for(var i = 0; i < this.props.posts.length; i++) {
                 result.push((
                     <tr key={this.props.posts[i].postID}>
                         <td>{this.props.posts[i].postID}</td>
-                        <td colSpan='3'>{this.props.posts[i].content}</td>
+                        <td colSpan={3}><Link to='/'>{this.props.posts[i].content}</Link></td>
                         <td>{this.props.posts[i].userName}</td>
                         <td>{this.props.posts[i].date}</td>
                     </tr>
