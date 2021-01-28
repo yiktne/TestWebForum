@@ -32,7 +32,7 @@ class PostList extends Component {
                 result.push((
                     <tr key={this.props.posts[i].postID}>
                         <td>{this.props.posts[i].postID}</td>
-                        <td colSpan={3} style={{color:'blue', textDecoration:'underline', cursor:'pointer'}} onClick={this.props.eventOpenPost.bind(this, this.props.posts[i].postID)}>{this.props.posts[i].content}</td>
+                        <td colSpan={3} style={{color:'blue', textDecoration:'underline', cursor:'pointer'}} onClick={this.props.eventOpenPost.bind(this, this.props.posts[i].postID)}>{this.props.posts[i].title}</td>
                         <td>{this.props.posts[i].userName}</td>
                         <td>{this.props.posts[i].date}</td>
                     </tr>

@@ -17,14 +17,36 @@ module.exports = (router, post, comment) => {
         });
     });
 
-    router.get('/getComments/:postID', (req, res) => {
+    router.get('/isPostOwner/:postID/:token', (req, res) => {
         if(req.params.postID === "" || req.params.postID === undefined) {
             return res.status(500).json({err:'postID not found', code:100});
         }
 
-        comment.find((err, res) => {
-            console.log(res);
-        })
+        post.findOne({"postID":req.params.postID}).then((post) => {
+            if(!post) {
+                console.log(err);
+                return res.status(500).json({err:'post not found', code:200});
+            }
+
+            jwt.verify(req.params.token, require('../secretdatas').jwtSecret, (err, decoded) => {
+                if(err) {
+                    console.log(err);
+                    return res.status(500).json({err});
+                }
+    
+                console.log(decoded.userID);
+                console.log(post.userID);
+
+                return res.json({"result":decoded.userID === post.userID});
+            });
+        });
+        
+    })
+
+    router.get('/getComments/:postID', (req, res) => {
+        if(req.params.postID === "" || req.params.postID === undefined) {
+            return res.status(500).json({err:'postID not found', code:100});
+        }
 
         comment.find({"postID":req.params.postID}).sort("sort").exec((err, result) => {
             if(err) {
@@ -72,10 +94,22 @@ module.exports = (router, post, comment) => {
             newPost.userName = decoded.nickName;
             newPost.content = req.body.content;
     
-            newPost.save().then((value) => {
-                console.log(value);
-                res.json({id:value.postID});
-            });
+            post.findOne().sort({"postID":-1}).exec((err, prev)=>{
+                if(!err) {
+                    newPost.prevPost = prev.postID;
+                } else {
+                    console.log(err);
+                }
+
+                newPost.save().then((value) => {
+                    console.log(value);
+
+                    prev.nextPost = value.postID;
+                    prev.save();
+
+                    res.json({id:value.postID});
+                });
+            })
         });
 
     });
@@ -110,6 +144,9 @@ module.exports = (router, post, comment) => {
     
             newComment.save().then((value) => {
                 console.log(value);
+                post.findOne({postID:value.postID}).then((post) => {
+                    post.comments.push(value._id);
+                });
                 res.json({id:value._id});
             });
         });

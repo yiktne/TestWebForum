@@ -2,25 +2,24 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withCookies } from 'react-cookie';
 import axios from 'axios';
+import {setCurrPost} from '../../Store/post';
 
 class PagePostDetail extends Component {
 
     commentContent = React.createRef();
 
     state = {
+        postData:{},
         comments:[],
+        postOwner:false,
     }
-
+    
     componentDidMount() {
-        axios.get(this.props.serverURL + "/getComments/" + this.props.currPost).then((res) => {
-            this.setState({...this.state, comments:res.data});
-            console.log(res)
-        });
+        this.updatePostData();
     }
 
     render() {
-
-        if(this.props.currPost === null) {
+        if(this.state.postData === {}) {
             console.log(this.props.id);
             // 데이터 받아오기
             return (<div></div>)
@@ -29,23 +28,31 @@ class PagePostDetail extends Component {
             for(var i = 0; i < this.state.comments.length; i++) {
                 commentTag.push(<tr><td>{this.state.comments[i].userID}<br/>{this.state.comments[i].content}</td></tr>);
             }
-            console.log(this.props.currPost);
             return (
                 <div>
                     <table>
                         <thead>
                             <tr>
                                 <td>제목</td>
-                                <td><input type="text" value={this.props.currPost.title} readOnly/></td>
+                                <td>{this.state.postData.title}</td>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>내용</td>
-                                <td><textarea value={this.props.currPost.content} readOnly/></td>
+                                <td>{this.state.postData.content}</td>
                             </tr>
                             <tr>
-                                <td colSpan="2">댓글</td>
+                                <td colSpan="2">
+                                    <input type="button" value="목록으로" onClick={this.handlePostList}/>
+                                    {this.state.postData.nextPost !== undefined ? (<input type="button" value="다음글" onClick={this.handleNextPost}/>) : ""}
+                                    {this.state.postData.prevPost !== undefined ? (<input type="button" value="이전글" onClick={this.handlePrevPost}/>) : ""}
+                                    {this.state.postOwner ? (<input type="button" value="수정하기"/>) : ""}
+                                    {this.state.postOwner ? (<input type="button" value="삭제하기"/>) : ""}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="2">댓글 ({commentTag.length})</td>
                             </tr>
                             {commentTag}
                             <tr>
@@ -67,11 +74,47 @@ class PagePostDetail extends Component {
             console.log(res)
         })
     }
+
+    handlePostList = () => {
+        this.props.history.push('/list');
+    }
+
+    handlePrevPost = () => {
+        this.props.setCurrPost(this.state.postData.prevPost);
+        this.updatePostData(this.state.postData.prevPost);
+        this.props.history.push('/detail/' + this.state.postData.prevPost);
+    }
+
+    handleNextPost = () => {
+        this.props.setCurrPost(this.state.postData.nextPost);
+        this.updatePostData(this.state.postData.nextPost);
+        this.props.history.push('/detail/' + this.state.postData.nextPost);
+    }
+
+    updatePostData = (postID = this.props.currPost) => {
+        for(let post in this.props.posts) {
+            if(this.props.posts[post].postID === postID) {
+                this.setState({...this.state, postData:this.props.posts[post]});
+                break;
+            }
+        }
+
+        axios.get(this.props.serverURL + "/getComments/" + postID).then((res) => {
+            this.setState({...this.state, comments:res.data});
+        });
+
+        axios.get(this.props.serverURL + "/isPostOwner/" + postID + "/" + this.props.cookies.get("userToken")).then((res) => {
+            this.setState({...this.state, postOwner:res.data.result})
+        });
+    }
 }
 
 const mapStateToProps = ({client, post}) => ({
     currPost:post.currPost,
+    posts:post.posts,
     serverURL:client.serverURL
 });
 
-export default connect(mapStateToProps)(withCookies(PagePostDetail));
+const mapDispatchToProps = {setCurrPost};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withCookies(PagePostDetail));
