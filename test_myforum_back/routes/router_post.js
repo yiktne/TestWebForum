@@ -17,6 +17,16 @@ module.exports = (router, post, comment) => {
         });
     });
 
+    router.get("/getComments", (req, res) => {
+        comment.find((err, result) => {
+            if(err) {
+                return res.status(500).json(err);
+            }
+
+            return res.json(result);
+        });
+    });
+
     router.get('/isPostOwner/:postID/:token', (req, res) => {
         if(req.params.postID === "" || req.params.postID === undefined) {
             return res.status(500).json({err:'postID not found', code:100});
@@ -148,6 +158,42 @@ module.exports = (router, post, comment) => {
                     post.comments.push(value._id);
                 });
                 res.json({id:value._id});
+            });
+        });
+    });
+
+    router.delete("/deletePost/:postID/:token", (req, res) => {
+        post.findOne({"postID":req.params.postID}).then((delPost) => {
+            jwt.verify(req.params.token, require('../secretdatas').jwtSecret, (err, decoded) => {
+                if(err) {
+                    return res.status(500).json({err});
+                }
+
+                if(decoded.userID !== delPost.userID) {
+                    return res.status(500).json({err:"id incorrect"})
+                }
+
+                if(delPost.nextPost) {
+                    post.find({"postID":{"$in":[delPost.prevPost, delPost.nextPost]}}).then((posts) => {
+                        posts[0].nextPost = delPost.nextPost;
+                        posts[1].prevPost = delPost.prevPost;
+
+                        posts[0].save();
+                        posts[1].save();
+                    });
+                } else {
+                    post.findOne({"postID":delPost.prevPost}).then((prev) => {
+                        prev.nextPost = undefined;
+                        prev.save();
+                    });
+                }
+
+                post.deleteOne({"postID":req.params.postID}).then((value) => {
+
+                    comment.deleteMany({"postID":req.params.postID}).then(() => {
+                        return res.json({result:value.ok});
+                    })
+                });
             });
         });
     });
