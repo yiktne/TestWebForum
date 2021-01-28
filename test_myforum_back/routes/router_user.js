@@ -35,8 +35,6 @@ module.exports = (router, User) => {
                 newUser.pwKey = pwKey;
                 newUser.userLevel = 1;
         
-                console.log(err);
-
                 newUser.save().then(function(product){
                     console.log(product);
                     
@@ -60,8 +58,6 @@ module.exports = (router, User) => {
 
             if(user !== null) {
                 crypto.pbkdf2(req.body.password, user.pwKey, require("../secretdatas").encryptCount, 64, "sha512", (err, key)=>{
-                    console.log(key.toString("base64"));
-                    console.log(user.pw);
                     if(key.toString("base64") === user.pw) {
                         // 로그인 성공
                         // JWT 발급

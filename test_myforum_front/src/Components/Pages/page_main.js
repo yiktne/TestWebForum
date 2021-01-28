@@ -48,7 +48,7 @@ class PageMain extends Component {
         }
 
         if(this.pwInput.value === '') {
-            alert('PW를 입력해주세요')
+            alert('비밀번호를 입력해주세요')
             return;
         }
 

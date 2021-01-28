@@ -7,7 +7,7 @@ var commentSchema = new Schema({
     userID:String,
     content:String,
     date:{type:Date, default: Date.now},
-    target:{type: ObjectId, ref: 'comment'},
+    target:ObjectId,
 });
 
 module.exports = mongoose.model("comment", commentSchema);

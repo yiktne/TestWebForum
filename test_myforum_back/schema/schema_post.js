@@ -9,6 +9,8 @@ var postSchema = new Schema({
     userID:String,
     userName:String,
     content:String,
+    prevPost:Number,
+    nextPost:Number,
     date:{type:Date, default: Date.now},
     comments:[ObjectId]
 });

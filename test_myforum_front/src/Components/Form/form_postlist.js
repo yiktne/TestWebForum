@@ -25,8 +25,6 @@ class PostList extends Component {
     renderList() {
         var result = [];
 
-        console.log(this.props.posts);
-
         if(this.props.posts.length === 0) {
             result.push((<tr key='nopost'><td colSpan={6}>게시글이 없습니다.</td></tr>));
         } else {
@@ -34,7 +32,7 @@ class PostList extends Component {
                 result.push((
                     <tr key={this.props.posts[i].postID}>
                         <td>{this.props.posts[i].postID}</td>
-                        <td colSpan={3}><Link to='/'>{this.props.posts[i].content}</Link></td>
+                        <td colSpan={3} style={{color:'blue', textDecoration:'underline', cursor:'pointer'}} onClick={this.props.eventOpenPost.bind(this, this.props.posts[i].postID)}>{this.props.posts[i].content}</td>
                         <td>{this.props.posts[i].userName}</td>
                         <td>{this.props.posts[i].date}</td>
                     </tr>

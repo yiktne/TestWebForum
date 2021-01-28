@@ -17,6 +17,34 @@ module.exports = (router, post, comment) => {
         });
     });
 
+    router.get('/getComments/:postID', (req, res) => {
+        if(req.params.postID === "" || req.params.postID === undefined) {
+            return res.status(500).json({err:'postID not found', code:100});
+        }
+
+        comment.find((err, res) => {
+            console.log(res);
+        })
+
+        comment.find({"postID":req.params.postID}).sort("sort").exec((err, result) => {
+            if(err) {
+                return res.status(500).json({err});
+            }
+
+            res.json(result);
+        });
+    });
+    
+    router.get('/getLastPost', (req, res) => {
+        post.findOne({}, {_id:0, postID:1}).sort({postID:-1}).exec((err, result) => {
+            if(err) {
+                return res.status(500).json({err});
+            }
+
+            res.json({lastID:result.postID});
+        });
+    });
+
     router.post('/post', (req, res) => {
         if(req.body.title === "" || req.body.title === undefined) {
             return res.status(500).json({err:'title not found', code:100});
@@ -27,8 +55,6 @@ module.exports = (router, post, comment) => {
         if(req.body.userToken === "" || req.body.userToken === undefined) {
             return res.status(500).json({err:'userToken not found', code:102});
         }
-
-        console.log(req.body.userToken);
 
         jwt.verify(req.body.userToken, require('../secretdatas').jwtSecret, (err, decoded) => {
 
@@ -52,5 +78,40 @@ module.exports = (router, post, comment) => {
             });
         });
 
+    });
+
+    router.post("/comment", (req, res) => {
+        
+        if(req.body.postID === "" || req.body.postID === undefined) {
+            return res.status(500).json({err:'postID not found', code:101});
+        }
+        if(req.body.content === "" || req.body.content === undefined) {
+            return res.status(500).json({err:'content not found', code:101});
+        }
+        if(req.body.userToken === "" || req.body.userToken === undefined) {
+            return res.status(500).json({err:'userToken not found', code:102});
+        }
+
+        jwt.verify(req.body.userToken, require('../secretdatas').jwtSecret, (err, decoded) => {
+
+            if(err) {
+                console.log(err);
+                return res.status(500).json(err);
+            }
+
+            let newComment = new comment();
+
+            console.log(decoded);
+
+            newComment.postID = req.body.postID;
+            newComment.userID = decoded.userID;
+            newComment.content = req.body.content;
+            newComment.target = req.body.target;
+    
+            newComment.save().then((value) => {
+                console.log(value);
+                res.json({id:value._id});
+            });
+        });
     });
 }

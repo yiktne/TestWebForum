@@ -5,6 +5,7 @@ import { withCookies } from 'react-cookie';
 import MainPage from '../Components/Pages/page_main';
 import Register from '../Components/Pages/page_register';
 import PostList from '../Components/Pages/page_postlist';
+import PostDetail from '../Components/Pages/page_postdetail';
 import Posting from '../Components/Pages/page_posting';
 
 class RouterMain extends Component {
@@ -15,6 +16,7 @@ class RouterMain extends Component {
                     <Route exact path="/" component={MainPage} />
                     <Route exact path="/register" component={Register} />
                     <Route exact path="/list" component={PostList} />
+                    <Route exact path="/detail/:id" component={PostDetail} />
                     <Route exact path="/post" component={Posting}/>
                 </Switch>
             </Router>

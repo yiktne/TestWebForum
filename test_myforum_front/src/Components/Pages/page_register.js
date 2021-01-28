@@ -54,6 +54,8 @@ class PageRegister extends Component {
                             case 201:
                                 this.setState({errorCode:ERR_ID_ALREADY_USED});
                                 break;
+                            default:
+                                break;
                         }
                     }
                 }
