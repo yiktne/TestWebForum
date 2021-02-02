@@ -43,9 +43,6 @@ module.exports = (router, post, comment) => {
                     console.log(err);
                     return res.status(500).json({err});
                 }
-    
-                console.log(decoded.userID);
-                console.log(post.userID);
 
                 return res.json({"result":decoded.userID === post.userID});
             });
@@ -97,8 +94,6 @@ module.exports = (router, post, comment) => {
 
             let newPost = new post();
 
-            console.log(decoded);
-
             newPost.title = req.body.title;
             newPost.userID = decoded.userID;
             newPost.userName = decoded.nickName;
@@ -145,19 +140,45 @@ module.exports = (router, post, comment) => {
 
             let newComment = new comment();
 
-            console.log(decoded);
-
             newComment.postID = req.body.postID;
             newComment.userID = decoded.userID;
             newComment.content = req.body.content;
             newComment.target = req.body.target;
     
             newComment.save().then((value) => {
-                console.log(value);
                 post.findOne({postID:value.postID}).then((post) => {
                     post.comments.push(value._id);
                 });
                 res.json({id:value._id});
+            });
+        });
+    });
+
+    router.put("/updatePost", (req, res) => {
+        if(req.body.postID === "" || req.body.postID === undefined) {
+            return res.status(500).json({err:'postID not found', code:101});
+        }
+        if(req.body.title === "" || req.body.title === undefined) {
+            return res.status(500).json({err:'title not found', code:100});
+        }
+        if(req.body.content === "" || req.body.content === undefined) {
+            return res.status(500).json({err:'content not found', code:101});
+        }
+        if(req.body.userToken === "" || req.body.userToken === undefined) {
+            return res.status(500).json({err:'userToken not found', code:102});
+        }
+
+        post.findOne({"postID":req.body.postID}).then((post) => {
+            jwt.verify(req.body.userToken, require('../secretdatas').jwtSecret, (err, decoded) => {
+                if(post.userID === decoded.userID) {
+                    post.title = req.body.title;
+                    post.content = req.body.content;
+                    post.save();
+
+                    return res.json({result:true});
+                } else {
+                    return res.status(500).json({err:"user incorrect"});
+                }
             });
         });
     });

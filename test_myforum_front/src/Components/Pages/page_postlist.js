@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import axios from 'axios';
 import {connect} from 'react-redux';
 
-import {setCurrPost, setPostList} from '../../Store/post';
+import {setPostList} from '../../Store/post';
 
 import PostList from '../Form/form_postlist';
 
@@ -29,7 +29,6 @@ class PagePostList extends Component {
     }
 
     handleOpenPost = (id) => {
-        this.props.setCurrPost(id);
         this.props.history.push('/detail/' + id);
     }
 }
@@ -39,6 +38,6 @@ const mapStateToProps = ({client, post}) => ({
     posts:post.posts,
 });
 
-const mapDispatchToProps = {setCurrPost, setPostList};
+const mapDispatchToProps = {setPostList};
 
 export default connect(mapStateToProps, mapDispatchToProps)(PagePostList);

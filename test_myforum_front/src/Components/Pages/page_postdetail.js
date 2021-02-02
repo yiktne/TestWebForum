@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withCookies } from 'react-cookie';
 import axios from 'axios';
-import {setCurrPost} from '../../Store/post';
 
 class PagePostDetail extends Component {
 
@@ -15,12 +14,21 @@ class PagePostDetail extends Component {
     }
     
     componentDidMount() {
-        this.updatePostData();
+        this.updatePostData(this.props.match.params.id);
+
+        window.addEventListener("popstate", this.eventPathChanged);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("popstate", this.eventPathChanged);
+    }
+
+    eventPathChanged = () => {
+        this.updatePostData(this.props.match.params.id);
     }
 
     render() {
         if(this.state.postData === {}) {
-            console.log(this.props.id);
             // 데이터 받아오기
             return (<div></div>)
         } else {
@@ -47,7 +55,7 @@ class PagePostDetail extends Component {
                                     <input type="button" value="목록으로" onClick={this.handlePostList}/>
                                     {this.state.postData.nextPost !== undefined ? (<input type="button" value="다음글" onClick={this.handleNextPost}/>) : ""}
                                     {this.state.postData.prevPost !== undefined ? (<input type="button" value="이전글" onClick={this.handlePrevPost}/>) : ""}
-                                    {this.state.postOwner ? (<input type="button" value="수정하기"/>) : ""}
+                                    {this.state.postOwner ? (<input type="button" value="수정하기" onClick={this.handleUpdatePost}/>) : ""}
                                     {this.state.postOwner ? (<input type="button" value="삭제하기" onClick={this.handleRemovePost}/>) : ""}
                                 </td>
                             </tr>
@@ -70,7 +78,7 @@ class PagePostDetail extends Component {
 
     handleSendComment = () => {
         console.log(this.props.cookies)
-        axios.post(this.props.serverURL + "/comment", {postID:this.props.currPost, content:this.commentContent.current.value, userToken:this.props.cookies.get("userToken")}).then((res) => {
+        axios.post(this.props.serverURL + "/comment", {postID:this.props.match.params.id, content:this.commentContent.current.value, userToken:this.props.cookies.get("userToken")}).then((res) => {
             alert("댓글을 달았습니다.");
             // 업데이트 추가하기
         })
@@ -81,20 +89,22 @@ class PagePostDetail extends Component {
     }
 
     handlePrevPost = () => {
-        this.props.setCurrPost(this.state.postData.prevPost);
         this.updatePostData(this.state.postData.prevPost);
         this.props.history.push('/detail/' + this.state.postData.prevPost);
     }
 
     handleNextPost = () => {
-        this.props.setCurrPost(this.state.postData.nextPost);
         this.updatePostData(this.state.postData.nextPost);
         this.props.history.push('/detail/' + this.state.postData.nextPost);
     }
 
+    handleUpdatePost = () => {
+        this.props.history.push('/update/' + this.props.match.params.id);
+    }
+
     handleRemovePost = () => {
         if(window.confirm("정말로 삭제하시겠습니까?")) {
-            axios.delete(this.props.serverURL + "/deletePost/" + this.props.currPost + "/" + this.props.cookies.get("userToken")).then((res) => {
+            axios.delete(this.props.serverURL + "/deletePost/" + this.props.match.params.id + "/" + this.props.cookies.get("userToken")).then((res) => {
                 if(res.data.result) {
                     alert("삭제되었습니다.");
                     this.props.history.push('/list');
@@ -105,9 +115,9 @@ class PagePostDetail extends Component {
         }
     }
 
-    updatePostData = (postID = this.props.currPost) => {
+    updatePostData = (postID) => {
         for(let post in this.props.posts) {
-            if(this.props.posts[post].postID === postID) {
+            if(this.props.posts[post].postID == postID) {
                 this.setState({...this.state, postData:this.props.posts[post]});
                 break;
             }
@@ -124,11 +134,8 @@ class PagePostDetail extends Component {
 }
 
 const mapStateToProps = ({client, post}) => ({
-    currPost:post.currPost,
     posts:post.posts,
     serverURL:client.serverURL
 });
 
-const mapDispatchToProps = {setCurrPost};
-
-export default connect(mapStateToProps, mapDispatchToProps)(withCookies(PagePostDetail));
+export default connect(mapStateToProps)(withCookies(PagePostDetail));

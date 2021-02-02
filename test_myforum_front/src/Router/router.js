@@ -7,6 +7,7 @@ import Register from '../Components/Pages/page_register';
 import PostList from '../Components/Pages/page_postlist';
 import PostDetail from '../Components/Pages/page_postdetail';
 import Posting from '../Components/Pages/page_posting';
+import UpdatePost from '../Components/Pages/page_updatepost';
 
 class RouterMain extends Component {
     render() {
@@ -18,6 +19,7 @@ class RouterMain extends Component {
                     <Route exact path="/list" component={PostList} />
                     <Route exact path="/detail/:id" component={PostDetail} />
                     <Route exact path="/post" component={Posting}/>
+                    <Route exact path="/update/:id" component={UpdatePost}/>
                 </Switch>
             </Router>
         );
