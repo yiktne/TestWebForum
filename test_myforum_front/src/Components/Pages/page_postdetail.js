@@ -60,6 +60,11 @@ class PagePostDetail extends Component {
                                 </td>
                             </tr>
                             <tr>
+                                <td colSpan="2">
+                                    <br/>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td colSpan="2">댓글 ({commentTag.length})</td>
                             </tr>
                             {commentTag}
@@ -77,10 +82,10 @@ class PagePostDetail extends Component {
     }
 
     handleSendComment = () => {
-        console.log(this.props.cookies)
         axios.post(this.props.serverURL + "/comment", {postID:this.props.match.params.id, content:this.commentContent.current.value, userToken:this.props.cookies.get("userToken")}).then((res) => {
             alert("댓글을 달았습니다.");
-            // 업데이트 추가하기
+            this.setState({...this.state, comments:this.state.comments.concat(res.data.comment)});
+            this.commentContent.current.value = "";
         })
     }
 

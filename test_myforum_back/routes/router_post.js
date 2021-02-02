@@ -149,7 +149,7 @@ module.exports = (router, post, comment) => {
                 post.findOne({postID:value.postID}).then((post) => {
                     post.comments.push(value._id);
                 });
-                res.json({id:value._id});
+                res.json({comment:value});
             });
         });
     });
