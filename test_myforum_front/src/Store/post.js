@@ -1,35 +1,18 @@
-const SET_POST_LIST = "post/SET_POST_LIST";
-const ADD_POST = "post/ADD_POST";
-const REMOVE_POST = "post/REMOVE_POST";
+const SET_LAST_PAGE = "post/SET_LAST_PAGE";
 
-export const setPostList = (posts) => ({type:SET_POST_LIST, posts});
-export const addPost = (post) => ({type:ADD_POST, post});
-export const removePost = (postID) => ({type:REMOVE_POST, postID});
+export const setLastPage = (page) => ({type:SET_LAST_PAGE, page});
 
 const initialState = {
-    lastPost:0,
-    posts:[]
+    lastPage:1,
 };
 
 export default function post(state=initialState, action) {
     switch(action.type) {
-        case SET_POST_LIST:
+        case SET_LAST_PAGE:
             return {
                 ...state,
-                posts:action.posts
+                lastPage:action.page
             };
-        case ADD_POST:
-            return {
-                ...state,
-                posts:state.posts.push(action.post),
-            }
-        case REMOVE_POST:
-            return {
-                ...state,
-                posts:state.posts.filter((value) => {
-                    return value.postID !== action.postID;
-                }),
-            }
     }
     return state;
 }

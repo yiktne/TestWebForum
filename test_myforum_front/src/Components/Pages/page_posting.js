@@ -21,7 +21,7 @@ class PagePosting extends Component {
             if(res.data !== undefined) {
                 alert("게시하였습니다.");
                 // 이후 작성한 게시글로 이동하기
-                this.props.history.push('/list');
+                this.props.history.push('/list/' + this.props.page);
             }
         }).catch((err) => {
             if(err.response.data !== undefined) {
@@ -31,15 +31,16 @@ class PagePosting extends Component {
                     alert("내용을 입력해주세요.");
                 } else if(err.response.data.code === ERR_USERTOKEN_NULL) {
                     alert("인증이 만료되었습니다. 다시 로그인해주세요.");
-                    this.props.history.push('/');
+                    this.props.cookies.remove("userToken");
                 }
             }
         });
     }
 }
 
-const mapStateToProps = ({client}) => ({
+const mapStateToProps = ({client, post}) => ({
     serverURL: client.serverURL,
+    page:post.lastPage,
 });
 
 export default connect(mapStateToProps)(withCookies(PagePosting));

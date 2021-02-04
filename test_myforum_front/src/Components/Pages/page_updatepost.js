@@ -9,13 +9,10 @@ class PageUpdatePost extends Component {
     editRef = React.createRef();
 
     componentDidMount() {
-        for(let post in this.props.posts) {
-            if(this.props.posts[post].postID == this.props.match.params.id) {
-                this.editRef.current.setTitle(this.props.posts[post].title);
-                this.editRef.current.setContent(this.props.posts[post].content);
-                break;
-            }
-        }
+        axios.get(this.props.serverURL + "/getPost/" + this.props.match.params.id).then((value) => {
+            this.editRef.current.setTitle(value.data.title);
+            this.editRef.current.setContent(value.data.content);
+        });
     }
 
     render() {
@@ -34,8 +31,7 @@ class PageUpdatePost extends Component {
     }
 }
 
-const mapStateToProps = ({client, post}) => ({
-    posts:post.posts,
+const mapStateToProps = ({client}) => ({
     serverURL:client.serverURL
 });
 

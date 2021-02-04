@@ -47,6 +47,10 @@ class PagePostDetail extends Component {
                         </thead>
                         <tbody>
                             <tr>
+                                <td>작성자</td>
+                                <td>{this.state.postData.userName}</td>
+                            </tr>
+                            <tr>
                                 <td>내용</td>
                                 <td>{this.state.postData.content}</td>
                             </tr>
@@ -90,7 +94,7 @@ class PagePostDetail extends Component {
     }
 
     handlePostList = () => {
-        this.props.history.push('/list');
+        this.props.history.push('/list/' + this.props.page);
     }
 
     handlePrevPost = () => {
@@ -112,7 +116,7 @@ class PagePostDetail extends Component {
             axios.delete(this.props.serverURL + "/deletePost/" + this.props.match.params.id + "/" + this.props.cookies.get("userToken")).then((res) => {
                 if(res.data.result) {
                     alert("삭제되었습니다.");
-                    this.props.history.push('/list');
+                    this.props.history.push('/list/' + this.props.page);
                 } else {
                     alert("글 삭제에 실패하였습니다.");
                 }
@@ -121,12 +125,9 @@ class PagePostDetail extends Component {
     }
 
     updatePostData = (postID) => {
-        for(let post in this.props.posts) {
-            if(this.props.posts[post].postID == postID) {
-                this.setState({...this.state, postData:this.props.posts[post]});
-                break;
-            }
-        }
+        axios.get(this.props.serverURL + "/getPost/" + postID).then((res) => {
+            this.setState({...this.state, postData:res.data});
+        });
 
         axios.get(this.props.serverURL + "/getComments/" + postID).then((res) => {
             this.setState({...this.state, comments:res.data});
@@ -139,8 +140,8 @@ class PagePostDetail extends Component {
 }
 
 const mapStateToProps = ({client, post}) => ({
-    posts:post.posts,
-    serverURL:client.serverURL
+    serverURL:client.serverURL,
+    page:post.lastPage,
 });
 
 export default connect(mapStateToProps)(withCookies(PagePostDetail));

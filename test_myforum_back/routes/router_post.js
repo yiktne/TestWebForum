@@ -6,14 +6,58 @@
 module.exports = (router, post, comment) => {
     const jwt = require('jsonwebtoken');
 
-    router.get('/getPosts', (req, res) => {
+    const page_post = 5;
 
-        post.find((err, result) => {
+    router.get('/getPage', (req, res) => {
+        post.find().count((err, count) => {
+            if(err) {
+                return res.status(500).json(err);
+            }
+            
+            count = count / page_post;
+
+            if(count % 1 !== 0) {
+                count += 1 - count % 1;
+            }
+
+            return res.json({count});
+        });
+    });
+
+    router.get('/getLastPost', (req, res) => {
+        post.findOne({}, {_id:0, postID:1}).sort({postID:-1}).exec((err, result) => {
+            if(err) {
+                return res.status(500).json({err});
+            }
+
+            res.json({lastID:result.postID});
+        });
+    });
+
+    router.get("/getPage/:page", (req, res) => {
+        page = req.params.page - 1;
+
+        post.find().skip(page * page_post).limit(page_post).sort({postID:-1}).exec((err, result) => {
+            if(err) {
+                return res.status(500).json({err});
+            }
+
+            res.json(result);
+        });
+    });
+
+    router.get("/getPagePost", (req, res) => {
+        return res.json({count:page_post});
+    })
+
+    router.get('/getPost/:id', (req, res) => {
+
+        post.findOne({postID:req.params.id},(err, result) => {
             if(err) {
                 return res.status(500).json(err);
             }
 
-            return res.json(result.sort((a, b) => b.date - a.date));
+            return res.json(result);
         });
     });
 
@@ -64,16 +108,6 @@ module.exports = (router, post, comment) => {
         });
     });
     
-    router.get('/getLastPost', (req, res) => {
-        post.findOne({}, {_id:0, postID:1}).sort({postID:-1}).exec((err, result) => {
-            if(err) {
-                return res.status(500).json({err});
-            }
-
-            res.json({lastID:result.postID});
-        });
-    });
-
     router.post('/post', (req, res) => {
         if(req.body.title === "" || req.body.title === undefined) {
             return res.status(500).json({err:'title not found', code:100});
